@@ -1,0 +1,110 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Pavement Cost Projection project timeline (reads from Power BI fields, no transforms needed)",
+  "width": 1200,
+  "height": {
+    "step": 26
+  },
+  "data": {
+    "name": "dataset"
+  },
+  "mark": {
+    "type": "bar",
+    "cornerRadius": 2,
+    "height": 13
+  },
+  "encoding": {
+    "y": {
+      "field": "Task",
+      "type": "nominal",
+      "sort": {
+        "field": "Start"
+      },
+      "title": null,
+      "axis": {
+        "labelLimit": 320,
+        "labelFontSize": 13
+      }
+    },
+    "x": {
+      "field": "Start",
+      "type": "temporal",
+      "title": "Date",
+      "axis": {
+        "format": "%b %Y"
+      }
+    },
+    "x2": {
+      "field": "FinishDate"
+    },
+    "color": {
+      "field": "ColorKey",
+      "type": "nominal",
+      "sort": [
+        "1. Data Validation",
+        "Buffer",
+        "2. Cost Integration",
+        "3. Model Refinement",
+        "4. Power BI Build",
+        "5. Review & Rollout",
+        "Milestone"
+      ],
+      "scale": {
+        "domain": [
+          "1. Data Validation",
+          "Buffer",
+          "2. Cost Integration",
+          "3. Model Refinement",
+          "4. Power BI Build",
+          "5. Review & Rollout",
+          "Milestone"
+        ],
+        "range": [
+          "#2F6FA6",
+          "#9AA2AA",
+          "#B4482F",
+          "#C98A2A",
+          "#3F8F5F",
+          "#6B5B95",
+          "#1C2126"
+        ]
+      },
+      "legend": {
+        "title": "Phase",
+        "orient": "bottom",
+        "columns": 4
+      }
+    },
+    "tooltip": [
+      {
+        "field": "Task",
+        "type": "nominal"
+      },
+      {
+        "field": "Phase",
+        "type": "nominal"
+      },
+      {
+        "field": "Start",
+        "type": "temporal",
+        "format": "%b %d, %Y"
+      },
+      {
+        "field": "Finish",
+        "type": "temporal",
+        "format": "%b %d, %Y"
+      }
+    ]
+  },
+  "config": {
+    "axis": {
+      "grid": true,
+      "gridColor": "#E1DFDD",
+      "domainColor": "#D8D3C8"
+    },
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI"
+  }
+}
