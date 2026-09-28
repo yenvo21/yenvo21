@@ -1,4 +1,0 @@
-pandas>=2.2
-numpy
-pyarrow
-oracledb>=2.0
