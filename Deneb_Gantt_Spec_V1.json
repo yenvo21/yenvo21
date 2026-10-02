@@ -1,0 +1,66 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"name": "dataset"},
+  "transform": [
+    {"calculate": "datum['Task ID'] + '  ' + datum['Task']", "as": "Label"},
+    {"calculate": "toDate(datum['Start'])", "as": "StartDate"},
+    {"calculate": "toDate(datum['End']) + 86400000", "as": "EndDate"}
+  ],
+  "facet": {
+    "row": {
+      "field": "Version", "type": "nominal", "title": null,
+      "header": {"labelAngle": 0, "labelAlign": "left", "labelAnchor": "start", "labelOrient": "top",
+                 "labelFontSize": 14, "labelFontWeight": "bold", "labelColor": "#00674B", "labelPadding": 6}
+    }
+  },
+  "resolve": {"scale": {"y": "independent"}},
+  "spacing": 24,
+  "spec": {
+    "width": 760,
+    "height": {"step": 22},
+    "layer": [
+      {
+        "transform": [{"filter": "datum['Milestone'] != 'Yes'"}],
+        "mark": {"type": "bar", "cornerRadius": 3, "height": {"band": 0.65}},
+        "encoding": {
+          "y": {"field": "Label", "type": "nominal", "sort": "ascending", "title": null,
+                "axis": {"labelLimit": 340, "labelFontSize": 11, "ticks": false, "domain": false}},
+          "x": {"field": "StartDate", "type": "temporal", "title": null,
+                "axis": {"format": "%b %d", "orient": "top", "grid": true, "gridColor": "#E6E9E6", "labelFontSize": 11}},
+          "x2": {"field": "EndDate"},
+          "color": {
+            "field": "Status", "type": "nominal", "title": "Status",
+            "scale": {"domain": ["Not started", "In progress", "Done", "Blocked"],
+                      "range": ["#B9C4BE", "#00674B", "#2F3B40", "#B5651D"]},
+            "legend": {"orient": "top", "direction": "horizontal"}
+          },
+          "tooltip": [
+            {"field": "Task ID"}, {"field": "Task"}, {"field": "Owner"}, {"field": "Workstream"},
+            {"field": "StartDate", "type": "temporal", "title": "Start", "format": "%b %d, %Y"},
+            {"field": "End", "type": "temporal", "title": "End", "format": "%b %d, %Y"},
+            {"field": "Status"}, {"field": "Depends On"}
+          ]
+        }
+      },
+      {
+        "transform": [{"filter": "datum['Milestone'] == 'Yes'"}],
+        "mark": {"type": "point", "shape": "diamond", "size": 170, "filled": true, "color": "#D9A300", "stroke": "#7A5C00", "strokeWidth": 1},
+        "encoding": {
+          "y": {"field": "Label", "type": "nominal", "sort": "ascending"},
+          "x": {"field": "StartDate", "type": "temporal"},
+          "tooltip": [
+            {"field": "Task ID"}, {"field": "Task", "title": "Milestone"},
+            {"field": "StartDate", "type": "temporal", "title": "Date", "format": "%b %d, %Y"},
+            {"field": "Status"}
+          ]
+        }
+      },
+      {
+        "transform": [{"aggregate": [{"op": "count", "as": "n"}]}, {"calculate": "now()", "as": "Today"}],
+        "mark": {"type": "rule", "color": "#B5651D", "strokeDash": [4, 3], "strokeWidth": 1.5},
+        "encoding": {"x": {"field": "Today", "type": "temporal"}}
+      }
+    ]
+  },
+  "config": {"font": "Segoe UI", "view": {"stroke": null}, "axis": {"labelColor": "#1C2528"}}
+}
