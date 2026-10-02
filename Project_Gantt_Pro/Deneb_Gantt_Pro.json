@@ -1,0 +1,548 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Project Gantt (Version 1 and Version 2). Fields: Task ID, Version, Phase, Task, Owner, Start, Finish, Status, Pct Complete, Milestone, Depends On",
+  "width": "container",
+  "height": {
+    "step": 26
+  },
+  "data": {
+    "name": "dataset"
+  },
+  "params": [
+    {
+      "name": "showOwner",
+      "value": true
+    }
+  ],
+  "transform": [
+    {
+      "calculate": "toDate(datum['Start'])",
+      "as": "S"
+    },
+    {
+      "calculate": "toDate(datum['Finish']) + 86400000",
+      "as": "E"
+    },
+    {
+      "calculate": "isValid(datum['Pct Complete']) ? datum['Pct Complete'] : 0",
+      "as": "Pct"
+    },
+    {
+      "calculate": "datum.S + (datum.E - datum.S) * datum.Pct",
+      "as": "P"
+    },
+    {
+      "calculate": "datum['Task ID'] + '   ' + datum['Task']",
+      "as": "Label"
+    },
+    {
+      "calculate": "(datum['Version'] == 'Version 2' ? 1e13 : 0) + datum.S + (datum['Milestone'] == 'Yes' ? 1 : 0)",
+      "as": "SortKey"
+    },
+    {
+      "calculate": "datum['Milestone'] == 'Yes'",
+      "as": "IsMs"
+    },
+    {
+      "calculate": "datum.__selected__ == 'off'",
+      "as": "Dim"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "Label",
+      "type": "nominal",
+      "title": null,
+      "sort": {
+        "field": "SortKey",
+        "op": "min"
+      },
+      "axis": {
+        "labelLimit": 330,
+        "labelFontSize": 11,
+        "labelPadding": 10,
+        "ticks": false,
+        "domain": false,
+        "labelColor": {
+          "expr": "indexof(datum.label, 'V2-') == 0 ? '#0F7C8C' : '#252423'"
+        }
+      }
+    }
+  },
+  "layer": [
+    {
+      "description": "Version 2 row shading",
+      "transform": [
+        {
+          "filter": "datum['Version'] == 'Version 2'"
+        }
+      ],
+      "mark": {
+        "type": "rect",
+        "fill": "#0F7C8C",
+        "opacity": 0.06
+      },
+      "encoding": {
+        "x": {
+          "value": 0
+        },
+        "x2": {
+          "value": "width"
+        }
+      }
+    },
+    {
+      "description": "Planned duration",
+      "transform": [
+        {
+          "filter": "!datum.IsMs"
+        }
+      ],
+      "params": [
+        {
+          "name": "phaseSel",
+          "select": {
+            "type": "point",
+            "fields": [
+              "Phase"
+            ]
+          },
+          "bind": "legend"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadius": 4,
+        "height": {
+          "band": 0.58
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "S",
+          "type": "temporal",
+          "title": null,
+          "axis": {
+            "orient": "top",
+            "format": "%b %Y",
+            "tickCount": "month",
+            "labelFontSize": 11,
+            "labelColor": "#605E5C",
+            "grid": true,
+            "gridColor": "#EDEBE9",
+            "domain": false,
+            "ticks": false,
+            "labelPadding": 6
+          },
+          "scale": {
+            "padding": 90
+          }
+        },
+        "x2": {
+          "field": "E"
+        },
+        "color": {
+          "field": "Phase",
+          "type": "nominal",
+          "title": null,
+          "scale": {
+            "domain": [
+              "1. Data Validation",
+              "Buffer",
+              "2. Cost Integration",
+              "3. Model Refinement",
+              "4. Power BI Build",
+              "5. Review & Rollout",
+              "6. Bid Item Analysis"
+            ],
+            "range": [
+              "#2F6FA6",
+              "#9AA2AA",
+              "#B4482F",
+              "#C98A2A",
+              "#3F8F5F",
+              "#6B5B95",
+              "#0F7C8C"
+            ]
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "columns": 4,
+            "labelLimit": 200,
+            "labelFontSize": 11,
+            "symbolType": "square",
+            "symbolSize": 120,
+            "columnPadding": 16,
+            "offset": 14,
+            "symbolOpacity": 1
+          }
+        },
+        "opacity": {
+          "condition": [
+            {
+              "test": "datum.Dim",
+              "value": 0.1
+            },
+            {
+              "param": "phaseSel",
+              "empty": true,
+              "value": 0.3
+            }
+          ],
+          "value": 0.07
+        },
+        "tooltip": [
+          {
+            "field": "Task ID",
+            "title": "ID"
+          },
+          {
+            "field": "Task"
+          },
+          {
+            "field": "Version"
+          },
+          {
+            "field": "Phase"
+          },
+          {
+            "field": "Owner"
+          },
+          {
+            "field": "S",
+            "type": "temporal",
+            "title": "Start",
+            "format": "%b %d, %Y"
+          },
+          {
+            "field": "Finish",
+            "type": "temporal",
+            "title": "Finish",
+            "format": "%b %d, %Y"
+          },
+          {
+            "field": "Status"
+          },
+          {
+            "field": "Pct",
+            "title": "Complete",
+            "format": ".0%"
+          },
+          {
+            "field": "Depends On"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Progress fill",
+      "transform": [
+        {
+          "filter": "!datum.IsMs && datum.Pct > 0"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadius": 4,
+        "height": {
+          "band": 0.58
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "S",
+          "type": "temporal"
+        },
+        "x2": {
+          "field": "P"
+        },
+        "color": {
+          "field": "Phase",
+          "type": "nominal"
+        },
+        "opacity": {
+          "condition": [
+            {
+              "test": "datum.Dim",
+              "value": 0.25
+            },
+            {
+              "param": "phaseSel",
+              "empty": true,
+              "value": 1
+            }
+          ],
+          "value": 0.15
+        },
+        "tooltip": [
+          {
+            "field": "Task"
+          },
+          {
+            "field": "Status"
+          },
+          {
+            "field": "Pct",
+            "title": "Complete",
+            "format": ".0%"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Owner and progress label",
+      "transform": [
+        {
+          "filter": "!datum.IsMs && showOwner"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 6,
+        "fontSize": 10,
+        "color": "#605E5C"
+      },
+      "encoding": {
+        "x": {
+          "field": "E",
+          "type": "temporal"
+        },
+        "text": {
+          "value": {
+            "expr": "datum['Owner'] + (datum.Pct > 0 ? '  \u00b7  ' + format(datum.Pct, '.0%') : '')"
+          }
+        },
+        "opacity": {
+          "condition": {
+            "test": "datum.Dim",
+            "value": 0.3
+          },
+          "value": 1
+        }
+      }
+    },
+    {
+      "description": "Milestones",
+      "transform": [
+        {
+          "filter": "datum.IsMs"
+        }
+      ],
+      "mark": {
+        "type": "point",
+        "shape": "diamond",
+        "filled": true,
+        "size": 190,
+        "color": "#1C2126",
+        "stroke": "white",
+        "strokeWidth": 1.5
+      },
+      "encoding": {
+        "x": {
+          "field": "S",
+          "type": "temporal"
+        },
+        "opacity": {
+          "condition": {
+            "test": "datum.Dim",
+            "value": 0.25
+          },
+          "value": 1
+        },
+        "tooltip": [
+          {
+            "field": "Task ID",
+            "title": "ID"
+          },
+          {
+            "field": "Task",
+            "title": "Milestone"
+          },
+          {
+            "field": "S",
+            "type": "temporal",
+            "title": "Date",
+            "format": "%b %d, %Y"
+          },
+          {
+            "field": "Owner"
+          },
+          {
+            "field": "Status"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Milestone date label",
+      "transform": [
+        {
+          "filter": "datum.IsMs"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 11,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "color": "#1C2126"
+      },
+      "encoding": {
+        "x": {
+          "field": "S",
+          "type": "temporal"
+        },
+        "text": {
+          "field": "S",
+          "type": "temporal",
+          "format": "%b %d"
+        }
+      }
+    },
+    {
+      "description": "Version 2 start line",
+      "transform": [
+        {
+          "filter": "datum['Version'] == 'Version 2'"
+        },
+        {
+          "aggregate": [
+            {
+              "op": "min",
+              "field": "S",
+              "as": "V2"
+            }
+          ]
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "rule",
+            "color": "#0F7C8C",
+            "strokeDash": [
+              6,
+              4
+            ],
+            "strokeWidth": 1.5
+          },
+          "encoding": {
+            "x": {
+              "field": "V2",
+              "type": "temporal"
+            },
+            "y": {
+              "value": 0
+            },
+            "y2": {
+              "value": "height"
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "top",
+            "dx": 5,
+            "dy": 4,
+            "fontSize": 11,
+            "fontWeight": "bold",
+            "color": "#0F7C8C"
+          },
+          "encoding": {
+            "x": {
+              "field": "V2",
+              "type": "temporal"
+            },
+            "y": {
+              "value": 0
+            },
+            "text": {
+              "value": "Version 2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Today line",
+      "transform": [
+        {
+          "aggregate": [
+            {
+              "op": "count",
+              "as": "n"
+            }
+          ]
+        },
+        {
+          "calculate": "now()",
+          "as": "Today"
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "rule",
+            "color": "#C4314B",
+            "strokeWidth": 1.5
+          },
+          "encoding": {
+            "x": {
+              "field": "Today",
+              "type": "temporal"
+            },
+            "y": {
+              "value": 0
+            },
+            "y2": {
+              "value": "height"
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "bottom",
+            "dx": 4,
+            "dy": -4,
+            "fontSize": 10,
+            "fontWeight": "bold",
+            "color": "#C4314B"
+          },
+          "encoding": {
+            "x": {
+              "field": "Today",
+              "type": "temporal"
+            },
+            "y": {
+              "value": "height"
+            },
+            "text": {
+              "value": "Today"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "config": {
+    "font": "Segoe UI",
+    "view": {
+      "stroke": null
+    },
+    "axis": {
+      "labelFont": "Segoe UI"
+    },
+    "legend": {
+      "labelColor": "#252423"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+// Home > Enter data > name the table "_Measures" > Load. Add each measure with New measure.
+
+Total Tasks =
+CALCULATE ( COUNTROWS ( ProjectTasks ), ProjectTasks[Milestone] = "No" )
+
+Tasks Done =
+CALCULATE ( COUNTROWS ( ProjectTasks ), ProjectTasks[Milestone] = "No", ProjectTasks[Status] = "Done" )
+
+// Progress weighted by task length, so long tasks count more than short ones
+Overall Progress =
+DIVIDE (
+    SUMX ( FILTER ( ProjectTasks, ProjectTasks[Milestone] = "No" ),
+           ProjectTasks[Pct Complete] * ProjectTasks[Duration (days)] ),
+    CALCULATE ( SUM ( ProjectTasks[Duration (days)] ), ProjectTasks[Milestone] = "No" )
+)
+
+// Tasks whose finish date has passed but are not marked Done
+Tasks Behind =
+COUNTROWS (
+    FILTER ( ProjectTasks,
+             ProjectTasks[Finish] < TODAY () && ProjectTasks[Status] <> "Done" && ProjectTasks[Milestone] = "No" )
+) + 0
+
+Next Milestone =
+VAR NextMs =
+    TOPN ( 1,
+           FILTER ( ProjectTasks, ProjectTasks[Milestone] = "Yes" && ProjectTasks[Start] >= TODAY () ),
+           ProjectTasks[Start], ASC )
+RETURN
+    COALESCE ( MAXX ( NextMs, ProjectTasks[Task] & "  ·  " & FORMAT ( ProjectTasks[Start], "mmm d" ) ), "None scheduled" )
+
+Days to Version 1 =
+DATEDIFF ( TODAY (), CALCULATE ( MAX ( ProjectTasks[Finish] ), ProjectTasks[Version] = "Version 1" ), DAY )
+
+// Format: Overall Progress as percentage (0 decimals); others as whole numbers.
