@@ -1,0 +1,277 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "name": "dataset"
+  },
+  "width": 900,
+  "height": {
+    "step": 26
+  },
+  "transform": [
+    {
+      "calculate": "toDate(datum['Start'])",
+      "as": "S"
+    },
+    {
+      "calculate": "toDate(datum['Finish']) + 86400000",
+      "as": "E"
+    },
+    {
+      "calculate": "datum['Pct Complete'] ? datum['Pct Complete'] : 0",
+      "as": "Pct"
+    },
+    {
+      "calculate": "datum.S + (datum.E - datum.S) * datum.Pct",
+      "as": "P"
+    },
+    {
+      "calculate": "(datum['Version'] == 'Version 2' ? 1e13 : 0) + datum.S",
+      "as": "SortKey"
+    }
+  ],
+  "layer": [
+    {
+      "transform": [
+        {
+          "filter": "datum['Milestone'] != 'Yes'"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadius": 4,
+        "height": 15,
+        "opacity": 0.3
+      },
+      "encoding": {
+        "y": {
+          "field": "Task",
+          "type": "nominal",
+          "title": null,
+          "sort": {
+            "field": "SortKey",
+            "op": "min"
+          },
+          "axis": {
+            "labelLimit": 330
+          }
+        },
+        "x": {
+          "field": "S",
+          "type": "temporal",
+          "title": null,
+          "axis": {
+            "orient": "top",
+            "format": "%b %Y",
+            "tickCount": "month"
+          }
+        },
+        "x2": {
+          "field": "E"
+        },
+        "color": {
+          "field": "Phase",
+          "type": "nominal",
+          "title": null,
+          "scale": {
+            "domain": [
+              "1. Data Validation",
+              "Buffer",
+              "2. Cost Integration",
+              "3. Model Refinement",
+              "4. Power BI Build",
+              "5. Review & Rollout",
+              "6. Bid Item Analysis"
+            ],
+            "range": [
+              "#2F6FA6",
+              "#9AA2AA",
+              "#B4482F",
+              "#C98A2A",
+              "#3F8F5F",
+              "#6B5B95",
+              "#0F7C8C"
+            ]
+          },
+          "legend": {
+            "orient": "bottom",
+            "columns": 4,
+            "labelLimit": 200,
+            "symbolOpacity": 1
+          }
+        },
+        "tooltip": [
+          {
+            "field": "Task"
+          },
+          {
+            "field": "Version"
+          },
+          {
+            "field": "Phase"
+          },
+          {
+            "field": "Owner"
+          },
+          {
+            "field": "S",
+            "type": "temporal",
+            "title": "Start",
+            "format": "%b %d, %Y"
+          },
+          {
+            "field": "Status"
+          },
+          {
+            "field": "Pct",
+            "title": "Complete",
+            "format": ".0%"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum['Milestone'] != 'Yes' && datum.Pct > 0"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadius": 4,
+        "height": 15
+      },
+      "encoding": {
+        "y": {
+          "field": "Task",
+          "type": "nominal",
+          "sort": {
+            "field": "SortKey",
+            "op": "min"
+          }
+        },
+        "x": {
+          "field": "S",
+          "type": "temporal"
+        },
+        "x2": {
+          "field": "P"
+        },
+        "color": {
+          "field": "Phase",
+          "type": "nominal"
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum['Milestone'] != 'Yes'"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 6,
+        "fontSize": 10,
+        "color": "#605E5C"
+      },
+      "encoding": {
+        "y": {
+          "field": "Task",
+          "type": "nominal",
+          "sort": {
+            "field": "SortKey",
+            "op": "min"
+          }
+        },
+        "x": {
+          "field": "E",
+          "type": "temporal"
+        },
+        "text": {
+          "field": "Owner"
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum['Milestone'] == 'Yes'"
+        }
+      ],
+      "mark": {
+        "type": "point",
+        "shape": "diamond",
+        "filled": true,
+        "size": 180,
+        "color": "#1C2126",
+        "opacity": 1
+      },
+      "encoding": {
+        "y": {
+          "field": "Task",
+          "type": "nominal",
+          "sort": {
+            "field": "SortKey",
+            "op": "min"
+          }
+        },
+        "x": {
+          "field": "S",
+          "type": "temporal"
+        },
+        "tooltip": [
+          {
+            "field": "Task",
+            "title": "Milestone"
+          },
+          {
+            "field": "S",
+            "type": "temporal",
+            "title": "Date",
+            "format": "%b %d, %Y"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "aggregate": [
+            {
+              "op": "count",
+              "as": "n"
+            }
+          ]
+        },
+        {
+          "calculate": "now()",
+          "as": "Today"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "color": "#C4314B",
+        "strokeWidth": 1.5
+      },
+      "encoding": {
+        "x": {
+          "field": "Today",
+          "type": "temporal"
+        }
+      }
+    }
+  ],
+  "config": {
+    "font": "Segoe UI",
+    "view": {
+      "stroke": null
+    },
+    "axis": {
+      "grid": true,
+      "gridColor": "#EDEBE9",
+      "domain": false,
+      "ticks": false
+    }
+  }
+}
