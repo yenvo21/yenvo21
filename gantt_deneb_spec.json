@@ -1,0 +1,93 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": { "name": "dataset" },
+  "width": "container",
+  "height": "container",
+  "config": {
+    "font": "Segoe UI",
+    "view": { "stroke": "transparent" },
+    "axis": { "labelColor": "#4A5163", "titleColor": "#4A5163", "labelFontSize": 12, "domain": false, "ticks": false },
+    "legend": { "labelColor": "#4A5163", "titleColor": "#4A5163", "labelFontSize": 12, "orient": "top" }
+  },
+  "encoding": {
+    "y": {
+      "field": "Task",
+      "type": "nominal",
+      "sort": { "field": "Order", "op": "min", "order": "ascending" },
+      "title": null,
+      "axis": { "labelLimit": 420, "labelFontSize": 13, "labelColor": "#141B2D", "grid": false, "labelPadding": 10 }
+    }
+  },
+  "layer": [
+    {
+      "transform": [{ "filter": "datum.Type === 'Task'" }],
+      "mark": { "type": "bar", "cornerRadius": 5, "height": { "band": 0.55 } },
+      "encoding": {
+        "x": {
+          "field": "Start",
+          "type": "temporal",
+          "title": null,
+          "scale": { "nice": "month" },
+          "axis": { "orient": "top", "format": "%b %Y", "tickCount": "month", "grid": true, "gridColor": "#E9EDF5", "labelFontWeight": "bold" }
+        },
+        "x2": { "field": "End" },
+        "color": {
+          "field": "Status",
+          "type": "nominal",
+          "title": "Status",
+          "scale": {
+            "domain": ["Done", "In progress", "Planned"],
+            "range": ["#4A5163", "#12239E", "#B8C2EC"]
+          }
+        },
+        "tooltip": [
+          { "field": "Task", "type": "nominal" },
+          { "field": "Status", "type": "nominal" },
+          { "field": "Start", "type": "temporal", "format": "%b %d, %Y" },
+          { "field": "End", "type": "temporal", "format": "%b %d, %Y" },
+          { "field": "Note", "type": "nominal" }
+        ]
+      }
+    },
+    {
+      "transform": [{ "filter": "datum.Type === 'Milestone'" }],
+      "mark": { "type": "point", "shape": "diamond", "filled": true, "size": 320, "color": "#E66C37" },
+      "encoding": {
+        "x": { "field": "Start", "type": "temporal" },
+        "tooltip": [
+          { "field": "Task", "type": "nominal" },
+          { "field": "Start", "type": "temporal", "title": "Date", "format": "%b %d, %Y" },
+          { "field": "Status", "type": "nominal" }
+        ]
+      }
+    },
+    {
+      "transform": [{ "filter": "datum.Type === 'Milestone'" }],
+      "mark": { "type": "text", "align": "left", "dx": 14, "fontSize": 12, "fontWeight": "bold", "color": "#A84A1F" },
+      "encoding": {
+        "x": { "field": "Start", "type": "temporal" },
+        "text": { "field": "Start", "type": "temporal", "format": "%b %d" }
+      }
+    },
+    {
+      "data": { "values": [{}] },
+      "transform": [{ "calculate": "now()", "as": "Today" }],
+      "mark": { "type": "rule", "color": "#E66C37", "strokeWidth": 2, "strokeDash": [6, 4] },
+      "encoding": {
+        "x": { "field": "Today", "type": "temporal" },
+        "y": { "value": 0 },
+        "y2": { "value": { "expr": "height" } }
+      }
+    },
+    {
+      "data": { "values": [{}] },
+      "transform": [{ "calculate": "now()", "as": "Today" }],
+      "mark": { "type": "text", "align": "left", "baseline": "bottom", "dx": 4, "dy": -2, "fontSize": 12, "fontWeight": "bold", "color": "#A84A1F" },
+      "encoding": {
+        "x": { "field": "Today", "type": "temporal" },
+        "y": { "value": { "expr": "height" } },
+        "text": { "value": "Today" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+Order,Task,Start,End,Status,Type,Note
+1,Data access and API pull,2026-10-20,2026-11-14,In progress,Task,Raw extract from AWP API
+2,Data model and joins,2026-10-27,2026-11-28,In progress,Task,Lettings > Proposals > Proposal Items > Bids
+3,Match projects to contract office,2026-10-27,2026-11-13,Done,Task,Program and awarded amount match
+4,Match bid item prices to contracts,2026-11-10,2026-12-19,In progress,Task,Validate vs CSV and online bid tabs
+5,Fill missing tables,2026-11-17,2027-01-09,Planned,Task,Waiting on data
+6,Power BI reports,2026-11-03,2027-01-16,In progress,Task,Mockups done
+7,District engineer review,2027-01-19,2027-02-06,Planned,Task,Feedback session
+8,Release version 1,2027-02-13,2027-02-13,Planned,Milestone,First release
